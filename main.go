@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"math/rand"
-	"slices"
 	"sync"
 	"time"
 )
@@ -36,8 +35,13 @@ func maximum(data []int) int {
 	if len(data) == 1 {
 		return data[0]
 	}
-	return slices.Max(data)
-
+	max := data[0]
+	for _, i := range data[1:] {
+		if i > max {
+			max = i
+		}
+	}
+	return max
 }
 
 // maxChunks returns the maximum number of elements in a chunks.
@@ -62,11 +66,11 @@ func maxChunks(data []int) int {
 
 		go func() {
 			defer wg.Done()
-			maxCounts[i] = slices.Max(data[sliceFirst:sliceEnd])
+			maxCounts[i] = maximum(data[sliceFirst:sliceEnd])
 		}()
 	}
 	wg.Wait()
-	return slices.Max(maxCounts)
+	return maximum(maxCounts)
 }
 
 func main() {
@@ -78,12 +82,12 @@ func main() {
 	var (
 		start   time.Time
 		max     int
-		elapsed time.Duration
+		elapsed int64
 	)
 
 	start = time.Now()
 	max = maximum(data)
-	elapsed = time.Duration(time.Since(start).Microseconds())
+	elapsed = time.Since(start).Microseconds()
 
 	fmt.Printf("Максимальное значение элемента: %d\nВремя поиска: %d ms\n", max, elapsed)
 
@@ -91,6 +95,6 @@ func main() {
 	// ваш код здесь
 	start = time.Now()
 	max = maxChunks(data)
-	elapsed = time.Duration(time.Since(start).Microseconds())
+	elapsed = time.Since(start).Microseconds()
 	fmt.Printf("Максимальное значение элемента: %d\nВремя поиска: %d ms\n", max, elapsed)
 }
